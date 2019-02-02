@@ -1,0 +1,72 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Maverick Food service</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    </head>
+    <body>
+    <style>
+        body {
+            background-color: beige;
+        }
+    </style>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Welcome!</div>
+                    <div class="panel-body">
+                        Maverick Food services, Ingredients For Your Success!.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <h2 style="padding-left: 15Px">Services Information</h2>
+    </div>
+    <div>
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+            <tr class="bg-info">
+                <th>Customer</th>
+                <th>Service Category</th>
+                <th>Description</th>
+                <th>Location</th>
+                <th>Setup Time</th>
+                <th>Cleanup Time</th>
+                <th>Service Charge</th>
+                <th colspan="3">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for service in services %}
+                <tr>
+                    <td>{{ service.cust_name }}</td>
+                    <td>{{ service.service_category }}</td>
+                     <td>{{ service.description }}</td>
+                    <td>{{ service.location }}</td>
+                    <td>{{ service.setup_time }}</td>
+                    <td>{{ service.cleanup_time }}</td>
+                    <td>{{ service.service_charge }}</td>
+                    <td><a href="{% url 'crm:service_edit' pk=service.pk %}"
+                           class="btn btn-warning">Edit</a></td>
+                    <td><a href="{% url 'crm:service_delete' pk=service.pk %}"
+                           onclick="return confirm('Are you sure you want to delete?')"
+                           class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+     <div class="row">
+            <a href="{% url 'crm:service_new' %}" class="row"><span
+                    class="btn btn-primary">Add Service</span></a>
+        </div>
+    </div>
+    </body>
+    </html>
+{% endblock %}

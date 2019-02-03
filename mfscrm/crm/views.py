@@ -194,15 +194,49 @@ def summary(request, pk):
 
 
 @login_required
-def GeneratePdf(request, pk):
-        customer = get_object_or_404(Customer, pk=pk)
-        customers_pdf = Customer.objects.filter(created_date__lte=timezone.now())
-       #customers_pdf = Customer.objects.filter(cust_name=pk)
-        context = {'customers':customers_pdf}
-        pdf = render_to_pdf('crm/summary.html', context)
-        response = HttpResponse(pdf, content_type='application/pdf')
-        response['content-Disposition'] = 'filename = "customers_{}.pdf"'
-        return response
+def download_summary_pdf(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    customers = Customer.objects.filter(created_date__lte=timezone.now())
+    services = Service.objects.filter(cust_name=pk)
+    products = Product.objects.filter(cust_name=pk)
+    sum_service_charge = Service.objects.filter(cust_name=pk).aggregate(Sum('service_charge'))
+    sum_product_charge = Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
 
+    context = {'products': products,
+               'customer': customer,
+               'services': services,
+               'sum_service_charge': sum_service_charge,
+               'sum_product_charge': sum_product_charge, }
+
+    message = 'Dear Customer, Thank you for requesting the detailed summary report. \n Regards, \n Maverick Food Services '
+    subject = 'Maverick Food Serives - ' + customer.cust_name + '-Detailed Summary Report'
+    to_email_id = customer.email
+
+    summarypdf = GeneratePdf(request, pk, context)
+    summaryFileName = 'Detailed Summary_' + str(customer.cust_name) + '.pdf'
+    msg = EmailMessage(subject, message, from_email="djangopython18@gmail.com", to=to_email_id)
+    msg.attach(summaryFileName, summarypdf, 'application/pdf')
+    msg.send()
+    return render(request, 'crm/summary.html', {'customer': customer,
+                                                'products': products,
+                                                'services': services,
+                                                'sum_service_charge': sum_service_charge,
+                                                'sum_product_charge': sum_product_charge,
+                                                'email_success': email_success})
+
+
+
+@login_required
+def GeneratePdf(request, pk, context):
+    customer = get_object_or_404(Customer, pk=pk)
+    template = get_template(context)
+
+    html = template.render(context)
+    pdf = render_to_pdf('crm/summary_pdf.html', context)
+    if pdf:
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['content-Disposition'] = 'filename = "customers_{}.pdf"'.format(customer.cust_name)
+        return pdf
+    return HttpResponse("Not Found")
 
 

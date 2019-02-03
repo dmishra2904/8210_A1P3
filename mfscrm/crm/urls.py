@@ -20,9 +20,10 @@ urlpatterns = [
     path('product/create/', views.product_new, name='product_new'),
     path('product/<int:pk>/edit/', views.product_edit, name='product_edit'),
     path('product/<int:pk>/delete/', views.product_delete, name='product_delete'),
-    #path('customer/<int:pk>/summary/', views.summary, name='summary'),
+    path('customer/<int:pk>/summary/', views.summary, name='summary'),
     #path('customer/<int:pk>/summary_pdf/', views.GeneratePdf, name='summary_download'),
-    path('customer/<int:pk>/summary_pdf/', views.GeneratePdf, name='summary_download'),
+    path('customer/<int:pk>/detailed_summary/', views.download_summary_pdf, name='download_summary_pdf')
+
 
 
 

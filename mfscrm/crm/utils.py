@@ -23,6 +23,6 @@ def render_to_pdf(template_src, context_dict={}):
     # This part will create the pdf.
     pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
     if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-        #return result.getvalue()
+        #return HttpResponse(result.getvalue(), content_type='application/pdf')
+        return result.getvalue()
     return HttpResponse('We had some errors<pre>%s</pre>' % escape(html))

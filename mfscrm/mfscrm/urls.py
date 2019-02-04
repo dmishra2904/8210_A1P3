@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.urls import path, re_path
 #from django.contrib.auth.views import views
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import \
     LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView, \
     PasswordResetView,PasswordResetDoneView, PasswordResetConfirmView,PasswordResetCompleteView
@@ -28,12 +29,7 @@ urlpatterns = [
     re_path(r'^accounts/login/$', LoginView.as_view(template_name='registration/login.html'), name="login"),
     re_path(r'^accounts/logout/$', LogoutView.as_view(), LogoutView.next_page, name="logout"),
     # change password urls
-    re_path(r'^accounts/password_change/$',
-            PasswordChangeView.as_view(template_name='registration/password_change_form.html'),
-            name='password_change'),
-    re_path(r'^accounts/password_change/done/$',
-            PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'),
-            name='password_change_done'),
+
     # reset password urls
     path('password_reset/',
             PasswordResetView.as_view(template_name='registration/password_reset_form.html'),

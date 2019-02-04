@@ -16,14 +16,31 @@
     </div>
 </div>
 
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                {% if email_sent == 'true' %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">Summary Sent!</div>
+                        <div class="panel-body">
+                            Summary has been sent to email id:  {{ customer.email }}
+                        </div>
+                     </div>
+                {% endif %}
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <h1 style="padding-left: 15Px">Customer Summary</h1>
 </div>
 
 <div class="row">
             <a href="{% url 'crm:download_summary_pdf' pk=customer.pk %}" class="row"><span
-                    class="btn btn-primary">Download Detailed Report</span></a>
+                    class="btn btn-primary">Email Report to Customer</span></a>
 </div>
+
+
 
     <div class="row">
         <h2 style="padding-left: 15Px">Customer Total</h2>

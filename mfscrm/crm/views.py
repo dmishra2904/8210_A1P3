@@ -14,7 +14,8 @@ from django.views.generic import View
 from django.template.loader import get_template
 #import render_to_pdf from util.py
 from .utils import render_to_pdf
-#import weasyprint
+from django.core.mail import send_mail, EmailMessage
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 
@@ -43,6 +44,42 @@ def register(request):
     return render(request,
                   'crm/register.html',
                   {'user_form': user_form})
+
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            return render(request, 'registration/password_change_done.html', {'crm': password_change_done})
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'registration/password_change_form.html', {
+        'form': form
+    })
+
+@login_required
+def password_change_done(request):
+    return render(request, 'registration/password_change_done.html', {'crm': password_change_done})
+
+def password_reset(request):
+    return render(request, 'registration/password_reset_form.html',
+    {'crm': password_reset})
+
+
+def password_reset_confirm(request):
+    return render(request, 'registration/password_reset_confirm.html',
+    {'crm': password_reset_confirm})
+
+def password_reset_email(request):
+    return render(request, 'registration/password_reset_email.html',
+    {'crm': password_reset_email})
+
+def password_reset_complete(request):
+    return render(request, 'registration/password_reset_complete.html',
+    {'crm': password_reset_complete})
 
 
 @login_required
@@ -186,19 +223,22 @@ def summary(request, pk):
     sum_service_charge = Service.objects.filter(cust_name=pk).aggregate(Sum('service_charge'))
     sum_product_charge = Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
     #total_customer_charge = sum_product_charge + sum_service_charge
-    return render(request, 'crm/summary.html', {'customers': customers,
+    return render(request, 'crm/summary.html', {'customer': customer,
                                                     'products': products,
                                                     'services': services,
                                                     'sum_service_charge': sum_service_charge,
-                                                    'sum_product_charge': sum_product_charge,})
+                                                    'sum_product_charge': sum_product_charge,
+                                                    'email_sent': 'false'})
 
 
 @login_required
 def download_summary_pdf(request, pk):
+    email_sent = 'False'
     customer = get_object_or_404(Customer, pk=pk)
     customers = Customer.objects.filter(created_date__lte=timezone.now())
     services = Service.objects.filter(cust_name=pk)
     products = Product.objects.filter(cust_name=pk)
+
     sum_service_charge = Service.objects.filter(cust_name=pk).aggregate(Sum('service_charge'))
     sum_product_charge = Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
 
@@ -208,28 +248,32 @@ def download_summary_pdf(request, pk):
                'sum_service_charge': sum_service_charge,
                'sum_product_charge': sum_product_charge, }
 
-    message = 'Dear Customer, Thank you for requesting the detailed summary report. \n Regards, \n Maverick Food Services '
-    subject = 'Maverick Food Serives - ' + customer.cust_name + '-Detailed Summary Report'
+    email_sent= 'False'
+
+    message = 'Dear '+customer.cust_name+', \n Thank you for being part of Maverick Food Services family.\n Please find the report attached for your detaul summary \n Regards, \n Maverick Food Services '
+    subject = 'Maverick Food Serives - ' + customer.cust_name + ' Detailed Summary Report'
     to_email_id = customer.email
 
     summarypdf = GeneratePdf(request, pk, context)
     summaryFileName = 'Detailed Summary_' + str(customer.cust_name) + '.pdf'
-    msg = EmailMessage(subject, message, from_email="djangopython18@gmail.com", to=to_email_id)
+    msg = EmailMessage(subject, message, from_email="djangopython18@gmail.com", to=[to_email_id])
     msg.attach(summaryFileName, summarypdf, 'application/pdf')
     msg.send()
+    email_sent='True'
     return render(request, 'crm/summary.html', {'customer': customer,
                                                 'products': products,
                                                 'services': services,
                                                 'sum_service_charge': sum_service_charge,
                                                 'sum_product_charge': sum_product_charge,
-                                                'email_success': email_success})
+                                                'email_sent': email_sent
+                                                })
 
 
 
 @login_required
 def GeneratePdf(request, pk, context):
     customer = get_object_or_404(Customer, pk=pk)
-    template = get_template(context)
+    template = get_template('crm/summary_pdf.html')
 
     html = template.render(context)
     pdf = render_to_pdf('crm/summary_pdf.html', context)

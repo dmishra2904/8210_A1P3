@@ -2,6 +2,7 @@ from django.conf.urls import url
 from . import views
 from django.urls import path, re_path
 from django.contrib.auth.views import  LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
+from django.contrib.auth import views as auth_views
 
 app_name = 'crm'
 urlpatterns = [
@@ -22,8 +23,9 @@ urlpatterns = [
     path('product/<int:pk>/delete/', views.product_delete, name='product_delete'),
     path('customer/<int:pk>/summary/', views.summary, name='summary'),
     #path('customer/<int:pk>/summary_pdf/', views.GeneratePdf, name='summary_download'),
-    path('customer/<int:pk>/detailed_summary/', views.download_summary_pdf, name='download_summary_pdf')
-
+    path('customer/<int:pk>/detailed_summary/', views.download_summary_pdf, name='download_summary_pdf'),
+    #path('change_password/', views.change_password, name='change_password'),
+    url(r'^password/$', views.change_password, name='change_password'),
 
 
 
